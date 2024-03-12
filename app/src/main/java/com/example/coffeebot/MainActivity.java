@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,8 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     private TextView responseTextView;
+    private SeekBar sugarSlider, creamSlider;
+    private TextView sugarText, creamText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         responseTextView = findViewById(R.id.responseTextView);
+        sugarSlider = findViewById(R.id.sugarSlider);
+        creamSlider = findViewById(R.id.creamSlider);
+        sugarText = findViewById(R.id.sugarText);
+        creamText = findViewById(R.id.creamText);
 
         // Find the button by its ID and set a click listener on the button
         Button connectButton = findViewById(R.id.connectButton);
@@ -36,13 +43,46 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("CoffeeBot", "Button pressed");
             }
         });
+
+        sugarSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                sugarText.setText("Sugar: " + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Add any required functionality here
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Add any required functionality here
+            }
+        });
+
+        creamSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                creamText.setText("Cream: " + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Add any required functionality here
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Add any required functionality here
+            }
+        });
     }
 
     private void sendGetRequestToPi() {
         // Create a new OkHttpClient
         OkHttpClient client = new OkHttpClient();
 
-        // Replace "http://192.168.1.XXX/endpoint" with your actual Raspberry Pi's IP address and endpoint
         String url = "http://10.121.4.204:5000/endpoint";
 
         // Build the request

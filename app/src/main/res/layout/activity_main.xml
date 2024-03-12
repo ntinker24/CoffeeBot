@@ -26,4 +26,49 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <SeekBar
+        android:id="@+id/sugarSlider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="3"
+        android:progress="0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/sugarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sugar: 0"
+        app:layout_constraintTop_toBottomOf="@+id/sugarSlider"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="10dp"/>
+
+    <SeekBar
+        android:id="@+id/creamSlider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="3"
+        android:progress="0"
+        app:layout_constraintTop_toBottomOf="@+id/sugarText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/creamText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cream: 0"
+        app:layout_constraintTop_toBottomOf="@+id/creamSlider"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="10dp"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
