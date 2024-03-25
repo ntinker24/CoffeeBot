@@ -83,7 +83,11 @@ public class MainActivity extends AppCompatActivity {
         // Create a new OkHttpClient
         OkHttpClient client = new OkHttpClient();
 
-        String url = "http://10.121.4.204:5000/endpoint";
+        // Retrieve the current values of the sliders
+        int sugarValue = sugarSlider.getProgress();
+        int creamValue = creamSlider.getProgress();
+
+        String url = "http://10.121.4.204:5000/endpoint?sugar=" + sugarValue + "&cream=" + creamValue;
 
         // Build the request
         Request request = new Request.Builder()
