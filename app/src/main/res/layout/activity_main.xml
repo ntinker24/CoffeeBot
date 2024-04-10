@@ -1,74 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/connectButton"
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/coffeebot"
+        android:contentDescription="Scaled logo" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonNewBrew"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:minWidth="120dp"
+        android:minHeight="48dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:text="New Brew"
+        android:background="@drawable/rounded_button"
+        android:textColor="@color/white"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp" />
 
-    <TextView
-        android:id="@+id/responseTextView"
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonSavedBrews"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Response will appear here"
-        app:layout_constraintTop_toBottomOf="@id/connectButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:minWidth="120dp"
+        android:minHeight="48dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:text="Saved Brews"
+        android:background="@drawable/rounded_button"
+        android:textColor="@color/white"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp" />
 
-    <SeekBar
-        android:id="@+id/sugarSlider"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:max="3"
-        android:progress="0"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        android:layout_marginTop="20dp"/>
-
-    <TextView
-        android:id="@+id/sugarText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sugar: 0"
-        app:layout_constraintTop_toBottomOf="@+id/sugarSlider"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="10dp"/>
-
-    <SeekBar
-        android:id="@+id/creamSlider"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:max="3"
-        android:progress="0"
-        app:layout_constraintTop_toBottomOf="@+id/sugarText"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        android:layout_marginTop="20dp"/>
-
-    <TextView
-        android:id="@+id/creamText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cream: 0"
-        app:layout_constraintTop_toBottomOf="@+id/creamSlider"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="10dp"/>
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
