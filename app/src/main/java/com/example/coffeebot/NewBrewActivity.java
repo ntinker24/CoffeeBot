@@ -1,5 +1,6 @@
 package com.example.coffeebot;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -251,7 +252,16 @@ public class NewBrewActivity extends AppCompatActivity {
                         responseTextView.setText("Failed to get response from server"); // Update UI on failure
                     });
                 }
+                navigateBackToMainActivity(); // Navigate back after handling the response
             }
         });
+    }
+
+    private void navigateBackToMainActivity() {
+        // Create an Intent to start MainActivity
+        Intent intent = new Intent(NewBrewActivity.this, MainActivity.class);
+        // Flags to clear the activity stack and bring an existing instance of MainActivity to the top
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
     }
 }
