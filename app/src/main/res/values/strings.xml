@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Welcome to CoffeeBot!</string>
     <string name="title_activity_new_brew">Customize your new brew</string>
+    <string name="title_activity_saved_brews">Run a saved brew</string>
 </resources>

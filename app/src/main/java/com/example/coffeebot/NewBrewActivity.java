@@ -1,12 +1,14 @@
 package com.example.coffeebot;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -14,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.TimePicker;
 import android.app.TimePickerDialog;
 import android.widget.Toast;
+import android.widget.CheckBox;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,7 +36,7 @@ import okhttp3.Response;
 
 public class NewBrewActivity extends AppCompatActivity {
 
-    private TextView responseTextView;
+//    private TextView responseTextView;
     private SeekBar caramelSlider, vanillaSlider;
     private TextView caramelText, vanillaText;
     private RadioGroup coffeeSizeRadioGroup;
@@ -40,13 +44,15 @@ public class NewBrewActivity extends AppCompatActivity {
     private Button timeButton;
     private String selectedTime = "";
     private MediaPlayer mediaPlayer;
+    private CheckBox savePresetCheckBox;
+    private EditText presetNameEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_newbrew);
 
-        responseTextView = findViewById(R.id.responseTextView);
+//        responseTextView = findViewById(R.id.responseTextView);
         caramelSlider = findViewById(R.id.caramelSlider);
         vanillaSlider = findViewById(R.id.vanillaSlider);
         caramelText = findViewById(R.id.caramelText);
@@ -55,12 +61,21 @@ public class NewBrewActivity extends AppCompatActivity {
         resultImageView = findViewById(R.id.resultImageView);
         timeButton = findViewById(R.id.timeButton);
         Button connectButton = findViewById(R.id.connectButton);
+        savePresetCheckBox = findViewById(R.id.savePresetCheckBox);
+        presetNameEditText = findViewById(R.id.presetNameEditText);
         selectedTime = "";
+
+        savePresetCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                presetNameEditText.setVisibility(View.VISIBLE);
+            } else {
+                presetNameEditText.setVisibility(View.GONE);
+            }
+        });
 
         timeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Open the time picker dialog
                 Calendar now = Calendar.getInstance();
                 int hour = now.get(Calendar.HOUR_OF_DAY);
                 int minute = now.get(Calendar.MINUTE);
@@ -69,11 +84,12 @@ public class NewBrewActivity extends AppCompatActivity {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
-                        Toast.makeText(NewBrewActivity.this, "Selected Time: " + selectedTime, Toast.LENGTH_LONG).show();
-                        timeButton.setText("Time: " + selectedTime);
+                        // Schedule the request for the selected time
+                        scheduleGetRequestForSelectedTime(selectedTime);
+                        // Navigate back immediately after scheduling
+                        navigateBackToMainActivity();
                     }
-                }, hour, minute, true); // 'true' for 24-hour time
-
+                }, hour, minute, true);
                 timePickerDialog.show();
             }
         });
@@ -81,36 +97,21 @@ public class NewBrewActivity extends AppCompatActivity {
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar now = Calendar.getInstance();
-                Calendar selectedCalendarTime = Calendar.getInstance();
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                // Send the request immediately
+                sendGetRequestToPi();
 
-                try {
-                    // Parse selectedTime to Calendar object
-                    Date date = sdf.parse(selectedTime);
-                    assert date != null;
-                    selectedCalendarTime.setTime(date);
-                    // Date is for today; adjust the date part to match 'now'
-                    selectedCalendarTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
-                    selectedCalendarTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
-                    selectedCalendarTime.set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH));
-
-                    long delayMillis = selectedCalendarTime.getTimeInMillis() - now.getTimeInMillis();
-
-                    if (delayMillis > 0) {
-                        // Time is set for the future, wait until then
-                        new Handler().postDelayed(() -> {
-                            sendGetRequestToPi();
-                        }, delayMillis);
+                // Check if the preset should be saved
+                if (savePresetCheckBox.isChecked()) {
+                    String presetName = presetNameEditText.getText().toString().trim();
+                    if (!presetName.isEmpty()) {
+                        savePreset(presetName);
                     } else {
-                        // Time is not set or is in the past, send request immediately
-                        sendGetRequestToPi();
+                        Toast.makeText(NewBrewActivity.this, "Please enter a preset name", Toast.LENGTH_SHORT).show();
                     }
-                } catch (ParseException e) {
-                    Log.e("MainActivity", "Error parsing selected time", e);
-                    // If there's an error parsing the time, default to immediate execution
-                    sendGetRequestToPi();
                 }
+                
+                // Navigate back immediately
+                navigateBackToMainActivity();
             }
         });
 
@@ -244,12 +245,12 @@ public class NewBrewActivity extends AppCompatActivity {
                     final String responseData = response.body().string();
                     Log.d("CoffeeBot", "Response received: " + responseData);
                     runOnUiThread(() -> {
-                        responseTextView.setText(responseData); // Update the TextView on UI thread
+//                        responseTextView.setText(responseData); // Update the TextView on UI thread
                     });
                 } else {
                     // If response is not successful (e.g., server returned error code)
                     runOnUiThread(() -> {
-                        responseTextView.setText("Failed to get response from server"); // Update UI on failure
+//                        responseTextView.setText("Failed to get response from server"); // Update UI on failure
                     });
                 }
                 navigateBackToMainActivity(); // Navigate back after handling the response
@@ -264,4 +265,47 @@ public class NewBrewActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
+
+    private void scheduleGetRequestForSelectedTime(String selectedTime) {
+        Calendar now = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        try {
+            Date date = sdf.parse(selectedTime);
+            Calendar selectedCalendarTime = Calendar.getInstance();
+            assert date != null;
+            selectedCalendarTime.setTime(date);
+            selectedCalendarTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
+            selectedCalendarTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
+            selectedCalendarTime.set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH));
+
+            long delayMillis = selectedCalendarTime.getTimeInMillis() - now.getTimeInMillis();
+            if (delayMillis > 0) {
+                new Handler().postDelayed(() -> sendGetRequestToPi(), delayMillis);
+            } else {
+                Log.e("NewBrewActivity", "Selected time is in the past. Not scheduling.");
+            }
+        } catch (ParseException e) {
+            Log.e("NewBrewActivity", "Error parsing selected time", e);
+        }
+    }
+
+    private void savePreset(String presetName) {
+        int caramelPumps = caramelSlider.getProgress();
+        int vanillaPumps = vanillaSlider.getProgress();
+        int selectedSizeId = coffeeSizeRadioGroup.getCheckedRadioButtonId();
+        RadioButton selectedRadioButton = findViewById(selectedSizeId);
+        String coffeeSize = selectedRadioButton.getText().toString();
+
+        // Combine the preferences into a single string with a delimiter for easy parsing later
+        String combinedPreferences = caramelPumps + ";" + vanillaPumps + ";" + coffeeSize;
+
+        // Use SharedPreferences to save the preset under the provided preset name
+        SharedPreferences prefs = getSharedPreferences("CoffeePresets", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(presetName, combinedPreferences);
+        editor.apply();
+
+        Toast.makeText(this, "Preset '" + presetName + "' saved!", Toast.LENGTH_SHORT).show();
+    }
+
 }

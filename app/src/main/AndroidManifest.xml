@@ -19,6 +19,11 @@
             android:label="@string/title_activity_new_brew"
             android:theme="@style/Theme.CoffeeBot" />
         <activity
+            android:name=".SavedBrewActivity"
+            android:exported="false"
+            android:label="@string/title_activity_saved_brews"
+            android:theme="@style/Theme.CoffeeBot" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" >
             <intent-filter>

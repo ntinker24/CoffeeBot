@@ -21,9 +21,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-//        secondScreenButton.setOnClickListener(v -> {
-//            Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-//            startActivity(intent);
-//        });
+        secondScreenButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SavedBrewActivity.class);
+            startActivity(intent);
+        });
     }
 }
