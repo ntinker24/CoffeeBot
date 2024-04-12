@@ -3,6 +3,8 @@ package com.example.coffeebot;
 import android.app.TimePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -13,8 +15,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -92,10 +97,15 @@ public class SavedBrewActivity extends AppCompatActivity {
     }
 
     private void sendGetRequestToPi(String presetData, String time) {
+        // Splitting the presetData based on the order in the savePreset: "caramel;vanilla;size"
         String[] parts = presetData.split(";");
-        String size = parts[0];
-        String caramel = parts[1];
-        String vanilla = parts[2];
+        if (parts.length != 3) {
+            Toast.makeText(this, "Preset data format is incorrect", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String caramel = parts[0]; // caramel pumps
+        String vanilla = parts[1]; // vanilla pumps
+        String size = parts[2]; // coffee size
 
         OkHttpClient client = new OkHttpClient();
         String url = "http://10.121.4.204:5000/endpoint?caramel=" + caramel + "&vanilla=" + vanilla + "&size=" + size + "&time=" + time;
@@ -143,21 +153,48 @@ public class SavedBrewActivity extends AppCompatActivity {
 
     private void showTimePickerDialog(String presetData) {
         Calendar now = Calendar.getInstance();
-        int hour = now.get(Calendar.HOUR_OF_DAY);
-        int minute = now.get(Calendar.MINUTE);
+        int currentHour = now.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = now.get(Calendar.MINUTE);
 
         TimePickerDialog timePickerDialog = new TimePickerDialog(
                 this,
                 (view, hourOfDay, minuteOfHour) -> {
-                    String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minuteOfHour);
-                    sendGetRequestToPi(presetData, formattedTime);
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                    try {
+                        // Parse the selected time into a Date object
+                        Date date = sdf.parse(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minuteOfHour));
+                        Calendar selectedTime = Calendar.getInstance();
+                        selectedTime.setTime(date);
+
+                        // Ensure the date components match today's date
+                        selectedTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
+                        selectedTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
+                        selectedTime.set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH));
+
+                        long delayMillis = selectedTime.getTimeInMillis() - now.getTimeInMillis();
+                        if (delayMillis > 0) {
+                            // Schedule the GET request after the calculated delay
+                            new Handler().postDelayed(() -> sendGetRequestToPi(presetData, getTimeString(selectedTime)), delayMillis);
+                            Toast.makeText(this, "Brew scheduled for " + getTimeString(selectedTime), Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(this, "Selected time is in the past. Please choose a future time.", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (ParseException e) {
+                        Toast.makeText(this, "Failed to parse the selected time.", Toast.LENGTH_SHORT).show();
+                        Log.e("SavedBrewActivity", "Error parsing selected time", e);
+                    }
                 },
-                hour,
-                minute,
+                currentHour,
+                currentMinute,
                 true // Use true here for 24-hour mode if required
         );
 
         timePickerDialog.setTitle("Select Time for Brewing");
         timePickerDialog.show();
+    }
+
+    private String getTimeString(Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        return sdf.format(calendar.getTime());
     }
 }

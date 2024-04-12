@@ -267,12 +267,16 @@ public class NewBrewActivity extends AppCompatActivity {
     }
 
     private void scheduleGetRequestForSelectedTime(String selectedTime) {
+        // Before scheduling, check if the user wants to save the preset.
+        if (savePresetCheckBox.isChecked() && !presetNameEditText.getText().toString().trim().isEmpty()) {
+            savePreset(presetNameEditText.getText().toString().trim());
+        }
+
         Calendar now = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
         try {
             Date date = sdf.parse(selectedTime);
             Calendar selectedCalendarTime = Calendar.getInstance();
-            assert date != null;
             selectedCalendarTime.setTime(date);
             selectedCalendarTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
             selectedCalendarTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
@@ -292,14 +296,19 @@ public class NewBrewActivity extends AppCompatActivity {
     private void savePreset(String presetName) {
         int caramelPumps = caramelSlider.getProgress();
         int vanillaPumps = vanillaSlider.getProgress();
+
+        // Retrieve the selected coffee size
         int selectedSizeId = coffeeSizeRadioGroup.getCheckedRadioButtonId();
-        RadioButton selectedRadioButton = findViewById(selectedSizeId);
-        String coffeeSize = selectedRadioButton.getText().toString();
+        String coffeeSize = ""; // Default to empty or some default value
+        if (selectedSizeId == R.id.eightOzRadioButton) {
+            coffeeSize = "8";
+        } else if (selectedSizeId == R.id.tenOzRadioButton) {
+            coffeeSize = "10";
+        } else if (selectedSizeId == R.id.twelveOzRadioButton) {
+            coffeeSize = "12";
+        }
 
-        // Combine the preferences into a single string with a delimiter for easy parsing later
         String combinedPreferences = caramelPumps + ";" + vanillaPumps + ";" + coffeeSize;
-
-        // Use SharedPreferences to save the preset under the provided preset name
         SharedPreferences prefs = getSharedPreferences("CoffeePresets", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(presetName, combinedPreferences);
