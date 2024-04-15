@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +36,7 @@ public class SavedBrewActivity extends AppCompatActivity {
     private Button scheduleTimeButton, brewNowButton, deletePresetButton;
     private ArrayAdapter<String> adapter;
     private List<String> presetNames;
+    private TextView presetDetailsTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class SavedBrewActivity extends AppCompatActivity {
         scheduleTimeButton = findViewById(R.id.scheduleTimeButton);
         brewNowButton = findViewById(R.id.brewNowButton);
         deletePresetButton = findViewById(R.id.deletePresetButton);
+        presetDetailsTextView = findViewById(R.id.presetDetailsTextView);
 
         loadPresets();
         setupButtonListeners();
@@ -61,12 +64,26 @@ public class SavedBrewActivity extends AppCompatActivity {
         presetsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // This ensures that whenever a new item is selected, the correct preset data is ready for use.
+                String selectedPreset = (String) parent.getItemAtPosition(position);
+                SharedPreferences prefs = getSharedPreferences("CoffeePresets", MODE_PRIVATE);
+                String presetDetails = prefs.getString(selectedPreset, "");
+
+                if (!presetDetails.isEmpty()) {
+                    String[] details = presetDetails.split(";");
+                    if (details.length == 3) {
+                        String displayText = "Size (oz): " + details[2] + "\nVanilla Pumps: " + details[1] + "\nCaramel Pumps: " + details[0];
+                        presetDetailsTextView.setText(displayText);
+                    } else {
+                        presetDetailsTextView.setText("Details are not properly formatted.");
+                    }
+                } else {
+                    presetDetailsTextView.setText("No details available for this preset.");
+                }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Handle the case where nothing is selected if necessary
+                presetDetailsTextView.setText("No preset selected");
             }
         });
     }
